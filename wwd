@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -o errexit
+set -o nounset
+set -o pipefail
+
+##!
+# The wallhaven base URL.
+##
+WALLHAVEN_URL=https://wallhaven.cc
+
+##!
+# The wallpapers required minimal resolution.
+##
+MIN_RESOLUTION=3840x2160
+
+##!
+# Wallpaper categories (flag)
+# 100 general
+# 010 anime
+# 001 people
+##
+CATEGORIES=100
+
+##!
+# Wallpaper purity flag (flag)
+# 100 sfw
+# 010 sketchy
+# 001 nsfw
+##
+PURITY=101
+
+##!
+# Wallpaper search criteria
+#
+# format:
+#
+#   tagname - search fuzzily for a tag/keyword
+#   -tagname - exclude a tag/keyword
+#   +tag1 +tag2 - must have tag1 and tag2
+#   +tag1 -tag2 - must have tag1 and NOT tag2
+#   @username - user uploads
+#   id:123 - Exact tag search (can not be combined)
+#   type:{png/jpg} - Search for file type (jpg = jpeg)
+#   like:wallpaper ID - Find wallpapers with similar tags
+#
+##
+SEARCH="nature -tv -anime -video-games -comics -cream -abstract -artwork -car"
+
+##!
+# The local path to store downloaded images.
+##
+WALLPAPERS_DIR=/var/lib/wallpapers
+
+##!
+# Get executable path or show an error.
+#
+# $1 the required executable
+# $output the executable full path
+##
+function require_program {
+    local program=$1
+    local path
+
+    path=$(command -v "${program}" 2>&1)
+
+    if [[ -z "${path}" ]]; then
+        echo "[ERROR] required program not found: ${program}" >&2
+        exit 1
+    fi
+
+    echo "${path}"
+}
+
+#### DEPENDENCIES ####
+CURL=$(require_program curl)
+JQ=$(require_program jq)
+
+##!
+# Load configuration file if available.
+#
+# $1 the configuration file path
+##
+function maybe_load_config {
+    local file_path=$1
+
+    if [[ -f "${file_path}" ]]; then
+        source "${file_path}"
+    fi
+}
+
+##!
+# Retrieve image information from the service.
+#
+# $output a list of image URLs.
+##
+function get_images {
+    curl -sSLf "${WALLHAVEN_URL}/api/v1/search" -G \
+        --data-urlencode "atleast=${MIN_RESOLUTION}" \
+        --data-urlencode "categories=${CATEGORIES}" \
+        --data-urlencode "purity=${PURITY}" \
+        --data-urlencode "q=${SEARCH}" \
+        --data-urlencode 'page=1' \
+        --data-urlencode "seed=${RANDOM}" \
+        | jq -r ".data[] | .path"
+}
+
+maybe_load_config /etc/wwd.conf
+maybe_load_config "${HOME}/.config/wwd/config"
+
+while read -r image_url; do
+    curl -sSLf "${image_url}" --create-dirs --output-dir "${WALLPAPERS_DIR}" -O
+done < <(get_images)

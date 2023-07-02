@@ -1,0 +1,9 @@
+[Unit]
+Description=Download a Wallhaven wallpaper every 5 minutes
+
+[Timer]
+OnBootSec=0s
+OnActiveSec=5m
+
+[Install]
+WantedBy=timers.target

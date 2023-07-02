@@ -1,0 +1,9 @@
+[Unit]
+Description=Wallhaven wallpaper downloader
+Requisite=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/wwd
+
+[Install]
