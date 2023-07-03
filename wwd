@@ -45,6 +45,7 @@ CATEGORIES=100
 PURITY=101
 SEARCH="nature -tv -anime -video-games -comics -cream -abstract -artwork -car"
 WALLPAPERS_DIR=/var/lib/wallpapers
+KEEP_DAYS=365
 
 maybe_load_config /etc/wwd.conf
 maybe_load_config "${HOME}/.config/wwd/config"
@@ -62,3 +63,7 @@ done < <(
         --data-urlencode "seed=${RANDOM}" \
         | ${JQ} -r ".data[] | .path"
 )
+
+if [[ ${KEEP_DAYS} -gt 0 ]]; then
+    find "${WALLPAPERS_DIR}" -type f -name 'wallhaven-*' -mtime +${KEEP_DAYS} -delete
+fi
