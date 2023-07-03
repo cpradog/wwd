@@ -1,9 +1,9 @@
 [Unit]
-Description=Download a Wallhaven wallpaper every 5 minutes
+Description=Download a Wallhaven wallpaper every 2 hours
 
 [Timer]
 OnBootSec=0s
-OnActiveSec=5m
+OnActiveSec=2h
 
 [Install]
 WantedBy=timers.target

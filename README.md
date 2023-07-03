@@ -10,7 +10,7 @@ make install
 
 ### Systemd users
 
-Systemd service and timer are already provided to download a wallpaper every day. To register them:
+Systemd service and timer are already provided to download wallpapers automatically. To register them:
 
 ``` sh
 systemd daemon-reload
@@ -19,10 +19,10 @@ systemd enable --now wwd.timer
 
 ### cron users
 
-For cron users, add the following line to your crontab to run the script every 5 minutes:
+For cron users, add the following line to your crontab to run the script every 2 hours:
 
 ``` text
-*/5 * * * *   /usr/bin/wwd
+* */2 * * *   /usr/bin/wwd
 ```
 
 ## Uninstall
